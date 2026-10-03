@@ -37,4 +37,11 @@ def redactar(cv: Cv, oferta: Oferta) -> str:
 
 
 def _minuscula(texto: str) -> str:
+    """Pasa la primera letra a minúscula para encadenar la frase, salvo en siglas y nombres propios (APIs, SQL, Docker)."""
+    palabra = texto.split(maxsplit=1)[0]
+    if palabra.isupper() or palabra[1:] != palabra[1:].lower() or palabra[0].isupper() and palabra not in _COMUNES:
+        return texto
     return texto[0].lower() + texto[1:]
+
+
+_COMUNES = {"Desarrollo", "Desarrollador", "Desarrolladora", "Ingeniero", "Ingeniera", "Soy", "Experiencia", "Trabajo", "Construyo", "Hago"}

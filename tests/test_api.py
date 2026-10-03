@@ -123,3 +123,17 @@ def test_adapt_y_rank_con_una_hoja_de_vida_incompleta_no_fallan(cliente):
     assert cliente.post("/v1/adapt", json={"cv": vacio, "oferta": oferta("a", "Backend")}, headers=HEAD).status_code == 200
     assert cliente.post("/v1/rank", json={"cv": vacio, "ofertas": [oferta("a", "Backend")]}, headers=HEAD).status_code == 200
     assert cliente.post("/v1/render", json={"cv": vacio}, headers=HEAD).status_code == 200
+
+
+@pytest.mark.parametrize("resumen,esperado", [
+    ("APIs in .NET con SQL Server.", "y APIs in .NET con SQL Server."),
+    ("Desarrollo de APIs en .NET.", "y desarrollo de APIs en .NET."),
+    ("SQL Server y Docker.", "y SQL Server y Docker."),
+    ("Docker en producción.", "y Docker en producción."),
+    ("hago APIs.", "y hago APIs."),
+])
+def test_la_carta_no_rompe_siglas_ni_nombres_propios_al_encadenar_el_resumen(cliente, resumen, esperado):
+    cv = {"nombre": "Ana", "titular": "Ingeniera", "resumen": resumen, "contacto": {"email": "", "enlaces": {}},
+          "experiencia": [], "proyectos": [], "educacion": [], "habilidades": []}
+    carta = cliente.post("/v1/letter", json={"cv": cv, "oferta": oferta("a", "Backend")}, headers=HEAD).json()["carta"]
+    assert esperado in carta
