@@ -104,3 +104,22 @@ def test_rechaza_cuerpos_invalidos(cliente):
     demasiadas = [oferta(str(i), "t") for i in range(501)]
     assert cliente.post("/v1/rank", json={"cv": CV, "ofertas": demasiadas}, headers=HEAD).status_code == 422
     assert cliente.post("/v1/render", json={"cv": {**CV, "salario": 1}}, headers=HEAD).status_code == 422
+
+
+def test_carta_con_una_hoja_de_vida_incompleta_no_falla(cliente):
+    """La API de negocio solo exige el nombre: titular, resumen, correo y experiencia pueden estar vacíos."""
+    vacio = {"nombre": "Ana", "titular": "", "resumen": "", "contacto": {"email": "", "enlaces": {}},
+             "experiencia": [], "proyectos": [], "educacion": [], "habilidades": []}
+    for variante in (vacio, {**vacio, "titular": "Ingeniera"}, {**vacio, "resumen": "Hago APIs."},
+                     {**vacio, "titular": "Ingeniera", "resumen": "hago APIs."}):
+        r = cliente.post("/v1/letter", json={"cv": variante, "oferta": oferta("a", "Backend")}, headers=HEAD)
+        assert r.status_code == 200, variante
+        assert r.json()["carta"].rstrip().endswith("Ana")
+
+
+def test_adapt_y_rank_con_una_hoja_de_vida_incompleta_no_fallan(cliente):
+    vacio = {"nombre": "Ana", "titular": "", "resumen": "", "contacto": {"email": "", "enlaces": {}},
+             "experiencia": [], "proyectos": [], "educacion": [], "habilidades": []}
+    assert cliente.post("/v1/adapt", json={"cv": vacio, "oferta": oferta("a", "Backend")}, headers=HEAD).status_code == 200
+    assert cliente.post("/v1/rank", json={"cv": vacio, "ofertas": [oferta("a", "Backend")]}, headers=HEAD).status_code == 200
+    assert cliente.post("/v1/render", json={"cv": vacio}, headers=HEAD).status_code == 200

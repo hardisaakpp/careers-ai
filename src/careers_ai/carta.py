@@ -17,17 +17,24 @@ def coincidencias(cv: Cv, oferta: Oferta) -> list[str]:
 
 
 def redactar(cv: Cv, oferta: Oferta) -> str:
+    """Una hoja de vida a medio llenar también produce una carta válida: cada dato que falta simplemente se omite."""
     comunes = coincidencias(cv, oferta)[:5]
-    lineas = [
-        f"Estimado equipo de {oferta.empresa or 'selección'}:",
-        "",
-        f"Me interesa la vacante «{oferta.titulo}». Soy {cv.titular.lower()} y {cv.resumen[0].lower()}{cv.resumen[1:]}",
-    ]
+    presentacion = f"Me interesa la vacante «{oferta.titulo}»."
+    if cv.titular.strip():
+        presentacion += f" Soy {cv.titular.strip().lower()}"
+        presentacion += f" y {_minuscula(cv.resumen.strip())}" if cv.resumen.strip() else "."
+    elif cv.resumen.strip():
+        presentacion += f" {cv.resumen.strip()}"
+    lineas = [f"Estimado equipo de {oferta.empresa or 'selección'}:", "", presentacion]
     if comunes:
         lineas += ["", f"Mi experiencia coincide con lo que buscan en: {', '.join(comunes)}."]
     ultimo = cv.experiencia[0] if cv.experiencia else None
-    if ultimo and ultimo.logros:
+    if ultimo and ultimo.logros and ultimo.organizacion.strip():
         lineas += ["", f"En {ultimo.organizacion}: {ultimo.logros[0]}"]
-    lineas += ["", "Adjunto mi hoja de vida. Quedo atento a una conversación.", "", "Saludos,", cv.nombre,
-               cv.contacto.email]
+    firma = [cv.nombre, cv.contacto.email]
+    lineas += ["", "Adjunto mi hoja de vida. Quedo atento a una conversación.", "", "Saludos,", *[d for d in firma if d.strip()]]
     return "\n".join(lineas) + "\n"
+
+
+def _minuscula(texto: str) -> str:
+    return texto[0].lower() + texto[1:]
