@@ -1,0 +1,64 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=1.8cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{10pt}{5pt}
+\setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
+
+\begin{document}
+{\LARGE\bfseries << cv.nombre|tex >>}\\[2pt]
+{\large << cv.titular|tex >>}\\[4pt]
+<< cv.contacto.email|tex >>\
+<% if cv.contacto.telefono %> \textbar{} << cv.contacto.telefono|tex >><% endif %>
+<% if cv.contacto.ubicacion %> \textbar{} << cv.contacto.ubicacion|tex >><% endif %>
+<% for etiqueta, url in cv.contacto.enlaces.items() %> \textbar{} \href{<< url|tex >>}{<< etiqueta|tex >>}<% endfor %>
+
+\section*{Resumen}
+<< cv.resumen|tex >>
+<% if cv.experiencia %>
+
+\section*{Experiencia}
+<% for e in cv.experiencia %>
+\textbf{<< e.cargo|tex >>}, << e.organizacion|tex >> \hfill << e.desde|tex >> -- << (e.hasta or "actual")|tex >>
+<% if e.logros %>
+\begin{itemize}
+<% for l in e.logros %>
+\item << l|tex >>
+<% endfor %>
+\end{itemize}
+<% endif %>
+<% if e.tecnologias %>
+\textit{<< e.tecnologias|join(", ")|tex >>}
+<% endif %>
+
+<% endfor %>
+<% endif %>
+<% if cv.proyectos %>
+\section*{Proyectos}
+<% for p in cv.proyectos %>
+\textbf{<< p.nombre|tex >>}<% if p.url %> (\href{<< p.url|tex >>}{enlace})<% endif %>: << p.descripcion|tex >>
+<% if p.tecnologias %> \textit{<< p.tecnologias|join(", ")|tex >>}<% endif %>
+
+<% endfor %>
+<% endif %>
+<% if cv.educacion %>
+\section*{Educación}
+<% for d in cv.educacion %>
+\textbf{<< d.titulo|tex >>}, << d.institucion|tex >> \hfill << d.desde|tex >> -- << (d.hasta or "actual")|tex >>
+
+<% endfor %>
+<% endif %>
+<% if cv.habilidades %>
+\section*{Habilidades}
+<% for g in cv.habilidades %>
+\textbf{<< g.nombre|tex >>:} << g.items|join(", ")|tex >>
+
+<% endfor %>
+<% endif %>
+\end{document}

@@ -1,0 +1,28 @@
+nombre: Ana Ejemplo
+titular: Ingeniera de software backend
+resumen: Desarrollo de APIs en .NET con SQL Server y despliegue en contenedores.
+contacto:
+  email: ana@example.com
+  ubicacion: Quito, Ecuador
+  enlaces:
+    GitHub: https://github.com/ana-ejemplo
+experiencia:
+  - cargo: Desarrolladora backend
+    organizacion: Empresa Demo & Co.
+    desde: "2022-03"
+    logros:
+      - Redujo el tiempo de una consulta de 8 s a 300 ms (índice filtrado).
+      - Automatizó el 90% del despliegue con Docker.
+    tecnologias: [".NET", "SQL Server", "Docker"]
+proyectos:
+  - nombre: Stockline
+    descripcion: Sistema de órdenes de compra con API .NET y frontend Next.js.
+    tecnologias: ["Next.js", ".NET", "TypeScript"]
+educacion:
+  - titulo: Ingeniería en Sistemas
+    institucion: Universidad Demo
+    desde: "2016"
+    hasta: "2021"
+habilidades:
+  - nombre: Lenguajes
+    items: ["C#", "TypeScript", "Python", "SQL"]
