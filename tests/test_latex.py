@@ -51,3 +51,42 @@ def test_modelo_rechaza_campos_desconocidos():
 
 def test_tecnologias_unificadas():
     assert {".NET", "Docker", "Next.js", "Python"} <= _cv().tecnologias()
+
+
+def _pdf(**cambios) -> str:
+    return renderizar(_cv(**cambios))
+
+
+def test_secciones_nuevas_se_renderizan():
+    tex = _pdf(
+        certificaciones=[{"nombre": "Scrum Foundation", "emisor": "Certiprof", "anio": "2024"}],
+        idiomas=[{"nombre": "Inglés", "nivel": "B2"}],
+        investigacion=[{"cargo": "Investigador", "organizacion": "Smart Lab", "desde": "2025-10",
+                        "ubicacion": "Quito, Ecuador", "logros": ["Pipeline RAG"]}],
+    )
+    assert "Scrum Foundation" in tex and "Certiprof" in tex
+    assert "Inglés" in tex and "B2" in tex
+    assert "Smart Lab" in tex and "Quito, Ecuador" in tex and "Pipeline RAG" in tex
+
+
+def test_entrada_desactivada_no_sale_en_el_pdf_pero_se_conserva():
+    cv = _cv(idiomas=[{"nombre": "Inglés", "nivel": "B2"}, {"nombre": "Klingon", "incluir": False}])
+    tex = renderizar(cv)
+    assert "Inglés" in tex and "Klingon" not in tex
+    assert len(cv.idiomas) == 2
+
+
+def test_seccion_oculta_no_sale_en_el_pdf():
+    base = _cv()
+    cv = base.model_copy(update={
+        "contacto": base.contacto.model_copy(update={"telefono": "+593 962567643"}),
+        "ocultas": ["resumen", "proyectos", "contacto.telefono"],
+    })
+    assert "+593 962567643" in renderizar(cv.model_copy(update={"ocultas": []}))
+    tex = renderizar(cv)
+    assert "Perfil profesional" not in tex and "Proyectos" not in tex
+    assert "+593 962567643" not in tex
+
+
+def test_entrada_incluida_por_defecto():
+    assert _cv(idiomas=[{"nombre": "Inglés"}]).idiomas[0].incluir is True

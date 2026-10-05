@@ -50,4 +50,4 @@ def _entorno() -> Environment:
 
 def renderizar(cv: Cv, plantilla: str = "clasica.tex") -> str:
     fuente = resources.files("careers_ai").joinpath("templates", plantilla).read_text("utf-8")
-    return _entorno().from_string(fuente).render(cv=cv)
+    return _entorno().from_string(fuente).render(cv=cv.para_pdf())
