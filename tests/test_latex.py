@@ -90,3 +90,14 @@ def test_seccion_oculta_no_sale_en_el_pdf():
 
 def test_entrada_incluida_por_defecto():
     assert _cv(idiomas=[{"nombre": "Inglés"}]).idiomas[0].incluir is True
+
+
+def test_un_estudio_sin_fechas_no_muestra_un_actual_falso():
+    tex = _pdf(educacion=[{"titulo": "Curso de Linux", "institucion": "Academia"}])
+    assert "Curso de Linux" in tex and "-- actual" not in tex.split("Curso de Linux")[1].split("Academia")[0]
+
+
+def test_las_referencias_solo_salen_si_estan_activadas():
+    cv = _cv(referencias=[{"nombre": "Luis Perez", "cargo": "Jefe", "contacto": "099"}])
+    assert "Luis Perez" in renderizar(cv)
+    assert "Luis Perez" not in renderizar(cv.model_copy(update={"ocultas": ["referencias"]}))

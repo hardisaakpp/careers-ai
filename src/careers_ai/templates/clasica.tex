@@ -11,10 +11,11 @@
 \titlespacing*{\section}{0pt}{10pt}{5pt}
 \setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
 
+<% macro fechas(desde, hasta) %><% if desde %><< desde|tex >> -- << (hasta or "actual")|tex >><% elif hasta %><< hasta|tex >><% endif %><% endmacro %>
 <% macro trabajos(lista) %>
 <% for e in lista %>
 \textbf{<< e.organizacion|tex >>}<% if e.ubicacion %> \hfill \textit{<< e.ubicacion|tex >>}<% endif %>\\
-<< e.cargo|tex >> \hfill \textit{<< e.desde|tex >> -- << (e.hasta or "actual")|tex >>}
+<< e.cargo|tex >><% if e.desde or e.hasta %> \hfill \textit{<< fechas(e.desde, e.hasta) >>}<% endif %>
 <% if e.logros %>
 \begin{itemize}
 <% for l in e.logros %>
@@ -25,7 +26,7 @@
 <% if e.tecnologias %>
 \textit{<< e.tecnologias|join(", ")|tex >>}
 <% endif %>
-
+\par\smallskip
 <% endfor %>
 <% endmacro %>
 \begin{document}
@@ -46,9 +47,8 @@
 
 \section*{Educación}
 <% for d in cv.educacion %>
-\textbf{<< d.titulo|tex >>} \hfill \textit{<< d.desde|tex >> -- << (d.hasta or "actual")|tex >>}\\
-<< d.institucion|tex >><% if d.ubicacion %> \hfill \textit{<< d.ubicacion|tex >>}<% endif %>
-
+\textbf{<< d.titulo|tex >>}<% if d.desde or d.hasta %> \hfill \textit{<< fechas(d.desde, d.hasta) >>}<% endif %>\\
+<< d.institucion|tex >><% if d.ubicacion %> \hfill \textit{<< d.ubicacion|tex >>}<% endif %>\par\smallskip
 <% endfor %>
 <% endif %>
 <% if cv.experiencia %>
@@ -66,8 +66,7 @@
 \section*{Proyectos}
 <% for p in cv.proyectos %>
 \textbf{<< p.nombre|tex >>}<% if p.url %> (\href{<< p.url|tex >>}{enlace})<% endif %>: << p.descripcion|tex >>
-<% if p.tecnologias %> \textit{<< p.tecnologias|join(", ")|tex >>}<% endif %>
-
+<% if p.tecnologias %> \textit{<< p.tecnologias|join(", ")|tex >>}<% endif %>\par\smallskip
 <% endfor %>
 <% endif %>
 <% if cv.habilidades %>
@@ -90,6 +89,13 @@
 \section*{Idiomas}
 <% for i in cv.idiomas %>
 \textbf{<< i.nombre|tex >>}<% if i.nivel %>: << i.nivel|tex >><% endif %><% if not loop.last %>\\<% endif %>
+<% endfor %>
+<% endif %>
+<% if cv.referencias %>
+
+\section*{Referencias}
+<% for r in cv.referencias %>
+\textbf{<< r.nombre|tex >>}<% if r.cargo %>, << r.cargo|tex >><% endif %><% if r.contacto %> \hfill << r.contacto|tex >><% endif %><% if not loop.last %>\\<% endif %>
 <% endfor %>
 <% endif %>
 \end{document}

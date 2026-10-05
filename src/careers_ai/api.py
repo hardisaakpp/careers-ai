@@ -13,13 +13,16 @@ import threading
 from pathlib import Path
 from typing import Callable
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field
 
 from .adaptacion.adaptar import Llm, adaptar, ollama_json
 from .carta import redactar
 from .compilar import compilar
+from .importar import ImportacionError, importar
+from .importar.extraer import ollama_importar
+from .importar.texto import MAX_BYTES
 from .latex import renderizar
 from .modelo import Cv
 from .modelos import Oferta
@@ -50,10 +53,11 @@ class RenderIn(BaseModel):
 
 class Ajustes:
     def __init__(self, clave: str, cache: Path, embedder: Embedder = ollama, llm: Llm = ollama_json,
-                 compilador: Callable[[Path], Path] = compilar) -> None:
+                 compilador: Callable[[Path], Path] = compilar, llm_importar: Llm = ollama_importar) -> None:
         if len(clave) < 16:
             raise ValueError("CAREERS_AI_KEY debe tener al menos 16 caracteres")
         self.clave, self.cache, self.embedder, self.llm, self.compilador = clave, cache, embedder, llm, compilador
+        self.llm_importar = llm_importar
         cache.parent.mkdir(parents=True, exist_ok=True)
 
 
@@ -124,5 +128,18 @@ def crear_app(ajustes: Ajustes | None = None) -> FastAPI:
             except Exception as e:  # noqa: BLE001 - latexmk/docker
                 raise HTTPException(422, "no se pudo compilar el CV") from e
             return Response(pdf.read_bytes(), media_type="application/pdf")
+
+    @app.post("/v1/import", dependencies=[Depends(autorizar)])
+    async def importar_cv(request: Request):
+        """El archivo viaja crudo en el cuerpo (PDF, DOCX o ZIP de LinkedIn); el formato se reconoce por su contenido."""
+        declarado = request.headers.get("content-length")
+        if declarado and declarado.isdigit() and int(declarado) > MAX_BYTES:
+            raise HTTPException(413, "demasiado-grande")
+        datos = await request.body()
+        try:
+            cv, origen, avisos = await run_in_threadpool(importar, datos, a.llm_importar)
+        except ImportacionError as e:
+            raise HTTPException(413 if e.codigo == "demasiado-grande" else 422, e.codigo) from e
+        return {"cv": cv.model_dump(mode="json"), "origen": origen, "avisos": avisos}
 
     return app

@@ -51,6 +51,13 @@ class Certificacion(_Base):
     incluir: bool = True
 
 
+class Referencia(_Base):
+    nombre: str
+    cargo: str = ""
+    contacto: str = ""
+    incluir: bool = True
+
+
 class Idioma(_Base):
     nombre: str
     nivel: str = ""
@@ -75,6 +82,7 @@ class Cv(_Base):
     investigacion: list[Experiencia] = Field(default_factory=list)
     certificaciones: list[Certificacion] = Field(default_factory=list)
     idiomas: list[Idioma] = Field(default_factory=list)
+    referencias: list[Referencia] = Field(default_factory=list)
     # Qué NO sale en el PDF: secciones ("resumen", "experiencia", …) y datos de contacto
     # ("contacto.telefono", …). Vacío = todo lo recomendado. Lo guardado nunca se pierde.
     ocultas: list[str] = Field(default_factory=list)
@@ -102,6 +110,7 @@ class Cv(_Base):
             "habilidades": self.habilidades if visible("habilidades") else [],
             "certificaciones": usar(self.certificaciones) if visible("certificaciones") else [],
             "idiomas": usar(self.idiomas) if visible("idiomas") else [],
+            "referencias": usar(self.referencias) if visible("referencias") else [],
         })
 
     def tecnologias(self) -> set[str]:
