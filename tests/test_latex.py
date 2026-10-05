@@ -93,7 +93,7 @@ def test_entrada_incluida_por_defecto():
 
 
 def test_un_estudio_sin_fechas_no_muestra_un_actual_falso():
-    tex = _pdf(educacion=[{"titulo": "Curso de Linux", "institucion": "Academia"}])
+    tex = _pdf(educacion=[{"titulo": "Curso de Linux", "institucion": "Academia", "desde": ""}])
     assert "Curso de Linux" in tex and "-- actual" not in tex.split("Curso de Linux")[1].split("Academia")[0]
 
 
