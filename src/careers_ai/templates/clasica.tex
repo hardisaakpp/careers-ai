@@ -13,6 +13,8 @@
 \usepackage{titlesec}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
+% Espacio entre una empresa/estudio/proyecto y el siguiente: lo bastante para que se distingan a simple vista.
+\newlength{\entradagap}\setlength{\entradagap}{9pt}
 \titleformat{\section}{\fontsize{10.5}{13}\selectfont\bfseries}{}{0em}{\MakeUppercase}[\titlerule]
 \titlespacing*{\section}{0pt}{10pt}{5pt}
 \setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
@@ -32,7 +34,7 @@
 <% if e.tecnologias %>
 \textit{<< e.tecnologias|join(", ")|tex >>}
 <% endif %>
-\par\smallskip
+<% if not loop.last %>\par\vspace{\entradagap}<% endif %>
 <% endfor %>
 <% endmacro %>
 \begin{document}
@@ -51,7 +53,7 @@
 \section*{Educación}
 <% for d in cv.educacion %>
 \textbf{<< d.titulo|tex >>}<% if d.desde or d.hasta %> \hfill \textit{<< fechas(d.desde, d.hasta) >>}<% endif %>\\
-<< d.institucion|tex >><% if d.ubicacion %> \hfill \textit{<< d.ubicacion|tex >>}<% endif %>\par\smallskip
+<< d.institucion|tex >><% if d.ubicacion %> \hfill \textit{<< d.ubicacion|tex >>}<% endif %><% if not loop.last %>\par\vspace{\entradagap}<% endif %>
 <% endfor %>
 <% endif %>
 <% if cv.experiencia %>
@@ -69,7 +71,7 @@
 \section*{Proyectos}
 <% for p in cv.proyectos %>
 \textbf{<< p.nombre|tex >>}<% if p.url %> (\href{<< p.url|tex >>}{enlace})<% endif %>: << p.descripcion|tex >>
-<% if p.tecnologias %> \textit{<< p.tecnologias|join(", ")|tex >>}<% endif %>\par\smallskip
+<% if p.tecnologias %> \textit{<< p.tecnologias|join(", ")|tex >>}<% endif %><% if not loop.last %>\par\vspace{\entradagap}<% endif %>
 <% endfor %>
 <% endif %>
 <% if cv.habilidades %>

@@ -175,3 +175,23 @@ def test_el_pdf_usa_la_tipografia_compacta_sans_serif():
 ])
 def test_la_etiqueta_que_escribe_la_persona_manda_sobre_la_direccion(etiqueta, url, texto):
     assert info_enlace(etiqueta, url)[1] == texto
+
+
+def _exp(n: int):
+    return [{"cargo": f"Cargo {i}", "organizacion": f"Empresa {i}", "desde": "2020"} for i in range(n)]
+
+
+def test_hay_espacio_entre_una_experiencia_y_la_siguiente_pero_no_despues_de_la_ultima():
+    sep = r"\par\vspace{\entradagap}"
+    sin_otras = {"proyectos": [], "educacion": [], "investigacion": []}
+    assert renderizar(_cv(experiencia=_exp(1), **sin_otras)).count(sep) == 0
+    assert renderizar(_cv(experiencia=_exp(2), **sin_otras)).count(sep) == 1
+    assert renderizar(_cv(experiencia=_exp(4), **sin_otras)).count(sep) == 3
+
+
+def test_estudios_y_proyectos_se_separan_igual_que_las_experiencias():
+    sep = r"\par\vspace{\entradagap}"
+    estudios = [{"titulo": f"T{i}", "institucion": f"I{i}", "desde": "2010"} for i in range(3)]
+    proyectos = [{"nombre": f"P{i}", "descripcion": "d"} for i in range(3)]
+    tex = renderizar(_cv(experiencia=[], investigacion=[], educacion=estudios, proyectos=proyectos))
+    assert tex.count(sep) == 4  # 2 entre estudios + 2 entre proyectos
