@@ -12,3 +12,5 @@ class Preferencias(BaseModel):
     excluir_texto: list[str] = Field(default_factory=list)    # p. ej. "security clearance"
     ubicaciones: list[str] = Field(default_factory=list)      # vacío = cualquiera
     obligatorias: list[str] = Field(default_factory=list)     # tecnologías imprescindibles
+    # Años de experiencia que la persona tiene o está dispuesta a aceptar como máximo en una oferta (None = sin límite).
+    max_anos: int | None = Field(default=None, ge=0, le=30)

@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from ..modelo import Cv
 from ..modelos import Oferta
 from .embeddings import Embedder, coseno
+from .nivel import anos_requeridos
 from .preferencias import Preferencias
 
 PESO_SEMANTICO = 0.6
@@ -54,6 +55,10 @@ def regla_dura(o: Oferta, pref: Preferencias) -> str | None:
     faltan = [t for t in pref.obligatorias if not _contiene(pajar, t)]
     if faltan:
         return f"falta tecnología obligatoria: {faltan[0]}"
+    if pref.max_anos is not None:
+        pide = anos_requeridos(o.titulo, o.descripcion)
+        if pide is not None and pide > pref.max_anos:
+            return f"pide {pide} años de experiencia"
     return None
 
 
