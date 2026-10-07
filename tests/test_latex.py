@@ -101,3 +101,56 @@ def test_las_referencias_solo_salen_si_estan_activadas():
     cv = _cv(referencias=[{"nombre": "Luis Perez", "cargo": "Jefe", "contacto": "099"}])
     assert "Luis Perez" in renderizar(cv)
     assert "Luis Perez" not in renderizar(cv.model_copy(update={"ocultas": ["referencias"]}))
+
+
+# ---------- encabezado con iconos ----------
+
+from careers_ai.latex import info_enlace, linea_contacto  # noqa: E402
+
+
+@pytest.mark.parametrize("etiqueta,url,icono,texto", [
+    ("GitHub", "https://github.com/usuario-demo", r"\faGithub", "usuario-demo"),
+    ("GitHub", "https://www.github.com/usuario-demo/repo", r"\faGithub", "usuario-demo"),
+    ("LinkedIn", "https://www.linkedin.com/in/usuario-demo/", r"\faLinkedin", "usuario-demo"),
+    ("LinkedIn", "https://linkedin.com/company/acme", r"\faLinkedin", "acme"),
+    ("LinkedIn", "https://linkedin.com/", r"\faLinkedin", "LinkedIn"),  # sin usuario: la etiqueta
+    ("Portafolio", "https://ana.example.com", r"\faGlobe", "Portafolio"),
+    ("", "https://ana.example.com/cv", r"\faGlobe", "ana.example.com"),
+    ("Mi sitio", "no es una url", r"\faGlobe", "Mi sitio"),
+    ("X", "http://[", r"\faGlobe", "X"),  # dirección rota: no debe lanzar
+])
+def test_cada_enlace_recibe_su_icono_y_se_muestra_el_usuario(etiqueta, url, icono, texto):
+    assert info_enlace(etiqueta, url) == (icono, texto)
+
+
+def _con_contacto(**c) -> Cv:
+    base = _cv()
+    return base.model_copy(update={"contacto": base.contacto.model_copy(update=c)})
+
+
+def test_encabezado_con_iconos_por_defecto():
+    cv = _con_contacto(telefono="+593 99", ubicacion="Quito",
+                       enlaces={"GitHub": "https://github.com/usuario-demo"})
+    linea = linea_contacto(cv, iconos=True)
+    assert r"\faPhone" in linea and r"\faEnvelope" in linea and r"\faGithub\ usuario-demo" in linea
+    assert linea.endswith("Quito")  # la ubicación va al final y sin icono, como en el CV de referencia
+    assert r"\faGithub" in renderizar(cv)
+
+
+def test_el_interruptor_quita_los_iconos_y_vuelve_a_la_etiqueta():
+    cv = _con_contacto(enlaces={"GitHub": "https://github.com/usuario-demo"})
+    tex = renderizar(cv.model_copy(update={"ocultas": ["contacto.iconos"]}))
+    assert r"\faGithub" not in tex and r"\faEnvelope" not in tex
+    assert r"{GitHub}" in tex  # el texto del enlace es la etiqueta, no el usuario
+
+
+def test_un_dato_de_contacto_oculto_no_deja_su_icono():
+    cv = _con_contacto(telefono="+593 99").model_copy(update={"ocultas": ["contacto.telefono"]})
+    assert r"\faPhone" not in renderizar(cv)
+
+
+def test_el_texto_del_encabezado_sigue_escapado_aunque_haya_iconos():
+    cv = _con_contacto(telefono=r"\input{/etc/passwd}", enlaces={r"\write18{x}": "https://ana.example.com/a_b%20c"})
+    linea = linea_contacto(cv, iconos=True)
+    assert "\\input{" not in linea.replace(r"\textbackslash{}", "") and "\\write18{" not in linea.replace(r"\textbackslash{}", "")
+    assert r"a\_b\%20c" in linea

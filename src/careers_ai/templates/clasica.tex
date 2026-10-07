@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[hidelinks]{hyperref}
 \usepackage{enumitem}
+\usepackage{fontawesome5}
 \usepackage{titlesec}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
@@ -33,10 +34,7 @@
 \begin{center}
 {\LARGE\bfseries << cv.nombre|tex >>}\\[2pt]
 {\large << cv.titular|tex >>}\\[4pt]
-<< cv.contacto.email|tex >>\
-<% if cv.contacto.telefono %> \textbar{} << cv.contacto.telefono|tex >><% endif %>
-<% if cv.contacto.ubicacion %> \textbar{} << cv.contacto.ubicacion|tex >><% endif %>
-<% for etiqueta, url in cv.contacto.enlaces.items() %> \textbar{} \href{<< url|tex >>}{<< etiqueta|tex >>}<% endfor %>
+{\small << contacto_linea >>}
 \end{center}
 <% if cv.resumen %>
 
