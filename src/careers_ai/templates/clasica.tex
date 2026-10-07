@@ -1,14 +1,19 @@
-\documentclass[10pt,a4paper]{article}
+\documentclass[9pt,a4paper]{extarticle}
 \usepackage[margin=1.8cm]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+% Carlito (métricas de Calibri): sans-serif de lectura cómoda en pantalla e impresión, más compacta que la serif anterior.
+\usepackage{carlito}
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\normalsize}{\fontsize{9.5}{12}\selectfont}
+\renewcommand{\small}{\fontsize{9}{11}\selectfont}
 \usepackage[hidelinks]{hyperref}
 \usepackage{enumitem}
 \usepackage{fontawesome5}
 \usepackage{titlesec}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
-\titleformat{\section}{\large\bfseries}{}{0em}{\MakeUppercase}[\titlerule]
+\titleformat{\section}{\fontsize{10.5}{13}\selectfont\bfseries}{}{0em}{\MakeUppercase}[\titlerule]
 \titlespacing*{\section}{0pt}{10pt}{5pt}
 \setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
 
@@ -32,8 +37,8 @@
 <% endmacro %>
 \begin{document}
 \begin{center}
-{\LARGE\bfseries << cv.nombre|tex >>}\\[2pt]
-{\large << cv.titular|tex >>}\\[4pt]
+{\fontsize{17}{20}\selectfont\bfseries << cv.nombre|tex >>}\\[2pt]
+{\fontsize{10.5}{13}\selectfont << cv.titular|tex >>}\\[4pt]
 {\small << contacto_linea >>}
 \end{center}
 <% if cv.resumen %>

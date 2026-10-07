@@ -154,3 +154,10 @@ def test_el_texto_del_encabezado_sigue_escapado_aunque_haya_iconos():
     linea = linea_contacto(cv, iconos=True)
     assert "\\input{" not in linea.replace(r"\textbackslash{}", "") and "\\write18{" not in linea.replace(r"\textbackslash{}", "")
     assert r"a\_b\%20c" in linea
+
+
+def test_el_pdf_usa_la_tipografia_compacta_sans_serif():
+    tex = renderizar(_cv())
+    assert r"\documentclass[9pt,a4paper]{extarticle}" in tex
+    assert r"\usepackage{carlito}" in tex and r"\familydefault}{\sfdefault}" in tex
+    assert r"\LARGE" not in tex  # el nombre ya no es de 25 pt
