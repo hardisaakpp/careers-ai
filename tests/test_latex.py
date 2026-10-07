@@ -161,3 +161,17 @@ def test_el_pdf_usa_la_tipografia_compacta_sans_serif():
     assert r"\documentclass[9pt,a4paper]{extarticle}" in tex
     assert r"\usepackage{carlito}" in tex and r"\familydefault}{\sfdefault}" in tex
     assert r"\LARGE" not in tex  # el nombre ya no es de 25 pt
+
+
+@pytest.mark.parametrize("etiqueta,url,texto", [
+    # Lo que la persona escribe en la etiqueta es lo que se muestra, sea cual sea la dirección…
+    ("CarlosOrtiz", "https://github.com/hardisaakpp", "CarlosOrtiz"),
+    ("carlosortiz", "https://www.linkedin.com/in/isaac-ortiz-581529169/", "carlosortiz"),
+    ("Mi portafolio", "https://ana.example.com", "Mi portafolio"),
+    # …y solo si es el nombre del sitio, o está vacía, se usa el usuario de la dirección.
+    ("LinkedIn", "https://www.linkedin.com/in/isaac-ortiz-581529169/", "isaac-ortiz-581529169"),
+    ("  github ", "https://github.com/hardisaakpp", "hardisaakpp"),
+    ("", "https://github.com/hardisaakpp", "hardisaakpp"),
+])
+def test_la_etiqueta_que_escribe_la_persona_manda_sobre_la_direccion(etiqueta, url, texto):
+    assert info_enlace(etiqueta, url)[1] == texto

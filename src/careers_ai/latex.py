@@ -51,11 +51,20 @@ def _sitio(url: str) -> tuple[str, list[str]]:
     return host, [x for x in p.path.split("/") if x]
 
 
+# Etiquetas que solo nombran el sitio: el icono ya lo dice, así que en su lugar se muestra el usuario de la dirección.
+_ETIQUETAS_GENERICAS = {"github", "gitlab", "linkedin", "twitter", "x", "web", "sitio web", "website",
+                        "enlace", "link"}
+
+
 def info_enlace(etiqueta: str, url: str) -> tuple[str, str]:
-    """(icono, texto) de un enlace de contacto. En GitHub y LinkedIn se muestra el usuario («hardisaakpp»),
-    no «GitHub»: el icono ya dice de qué sitio es. En cualquier otro, la etiqueta que puso la persona."""
+    """(icono, texto) de un enlace de contacto. El texto es lo que la persona escribió en la etiqueta
+    («CarlosOrtiz»); solo si la dejó vacía o puso el nombre del sitio («GitHub»), que el icono ya
+    dice, se muestra el usuario de la dirección (github.com/**usuario**)."""
     host, partes = _sitio(url)
     icono = next((i for h, i in _ICONOS.items() if host == h or host.endswith("." + h)), _ICONO_WEB)
+    etiqueta = etiqueta.strip()
+    if etiqueta and etiqueta.casefold() not in _ETIQUETAS_GENERICAS:
+        return icono, etiqueta
     usuario = ""
     if host.endswith(("github.com", "gitlab.com")):
         usuario = partes[0] if partes else ""
