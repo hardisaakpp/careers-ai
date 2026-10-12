@@ -26,6 +26,25 @@ from careers_ai.ranking.ranking import ordenar, regla_dura
     ("Backend Developer", "Experience: 3-5 years", 3),  # un rango: lo mínimo que piden
     ("Backend Developer", "3 to 5 years of experience", 3),
     ("Desarrollador", "de 2 a 4 años de experiencia", 2),
+    # nivel intermedio: ~3 años, y «semi senior» no es «senior»
+    ("Desarrollador Semi Senior", "", 3),
+    ("Backend SSR", "", 3),
+    ("Mid Level Full-Stack Developer", "", 3),
+    ("Software Engineer II", "", 3),
+    ("Software Engineer III", "", 5),
+    ("Mid-Senior Backend Developer", "", 4),
+    ("Backend Developer", "Buscamos un Desarrollador Full Stack Semi Senior para un proyecto", 3),
+    # el «+», «o más» o un rango bastan, con una palabra de oficio cerca
+    ("Backend Engineer", "4+ years building backends with Python", 4),
+    ("Desarrollador", "4+ años en C# / .NET con ASP.NET Core", None),  # sin palabra de oficio cerca: «C#» no cuenta
+    ("Desarrollador", "5 o más años de experiencia demostrable", 5),
+    ("Software Engineer", "5–10 years of professional software engineering experience", 5),
+    ("Desarrollador Golang", "Trayectoria de 3 a 5 años en desarrollo de software", 3),
+    ("Developer", "Senior level with 5+ years of software engineering", 5),
+    # el perfil que busca la descripción
+    ("Full Stack Engineer", "We are looking for a senior engineer to join us", 5),
+    ("Developer", "Experiencia como Backend Developer Senior en integraciones", 5),
+    ("Developer", "Ser un Backend Senior con criterio propio", 5),
     # manda el indicio más exigente
     ("Junior Developer", "2+ years of experience", 2),
     ("Senior Developer", "2+ years of experience", 5),
@@ -35,6 +54,12 @@ from careers_ai.ranking.ranking import ordenar, regla_dura
     ("Backend Developer", "We are a company with 20 years of experience in logistics", None),  # habla de la empresa
     ("Developer", "3 years of Docker experience", None),  # experiencia en una tecnología, no un requisito general
     ("Leadership Coach", "", None),
+    ("Full Stack Engineer", "You'll join a team of 8 colleagues (1 Manager, 5 Senior Developers, YOU!)", None),  # el equipo, no el puesto
+    ("Developer", "We're looking for Junior and Senior Developers to join us", None),  # ambos niveles: no dice cuál
+    ("Growth Strategist", "You'll be embedded with senior sales leaders", None),  # con quién trabaja, no el nivel pedido
+    ("Desarrollador", "Carrera de 4 a 5 años de estudio en ingeniería", None),  # duración de la carrera, no experiencia
+    ("Engineer", "Our product has 140 years of history and 50,000 years of audio", None),
+    ("Developer", "an engineer ii of the day", None),  # «ii» en minúscula no es un nivel
 ])
 def test_anos_requeridos(titulo, descripcion, esperado):
     assert anos_requeridos(titulo, descripcion) == esperado
