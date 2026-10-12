@@ -75,6 +75,14 @@ def test_rank_aplica_reglas_duras(cliente):
     assert por_id["a"]["excluida"] == "título excluido" and por_id["b"]["excluida"] is None
 
 
+def test_rank_informa_la_experiencia_que_pide_cada_oferta(cliente):
+    ofertas = [oferta("a", "Senior Backend Engineer"),
+               oferta("b", "Backend Engineer", "Requisitos: 3+ years of experience con APIs"),
+               oferta("c", "Backend API engineer", "APIs con .NET")]
+    por_id = {x["id"]: x for x in rank_completo(cliente, ofertas)["resultados"]}
+    assert (por_id["a"]["anos"], por_id["b"]["anos"], por_id["c"]["anos"]) == (5, 3, None)
+
+
 def test_rank_primera_vez_informa_pendientes(cliente):
     primera = rank(cliente, [oferta("a", "Backend API engineer")])
     assert primera["pendientes"] in (0, 1)

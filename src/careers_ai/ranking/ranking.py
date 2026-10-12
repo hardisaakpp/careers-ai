@@ -28,6 +28,7 @@ class Resultado:
     coinciden: list[str] = field(default_factory=list)
     faltan: list[str] = field(default_factory=list)
     similitud: float = 0.0
+    anos: int | None = None  # experiencia que dice pedir la oferta; None = no lo indica
 
 
 def _contiene(texto: str, termino: str) -> bool:
@@ -63,7 +64,7 @@ def regla_dura(o: Oferta, pref: Preferencias) -> str | None:
 
 
 def ordenar(cv: Cv, ofertas: list[Oferta], pref: Preferencias, embedder: Embedder) -> list[Resultado]:
-    resultados = [Resultado(o, excluida=regla_dura(o, pref)) for o in ofertas]
+    resultados = [Resultado(o, excluida=regla_dura(o, pref), anos=anos_requeridos(o.titulo, o.descripcion)) for o in ofertas]
     vivas = [r for r in resultados if r.excluida is None]
     if vivas:
         vectores = embedder([texto_cv(cv), *[texto_oferta(r.oferta) for r in vivas]])

@@ -106,7 +106,7 @@ def crear_app(ajustes: Ajustes | None = None) -> FastAPI:
         return {
             "pendientes": len(faltan),
             "resultados": [{"id": r.oferta.id, "puntaje": r.puntaje, "excluida": r.excluida,
-                            "coinciden": r.coinciden} for r in resultados],
+                            "coinciden": r.coinciden, "anos": r.anos} for r in resultados],
         }
 
     @app.post("/v1/adapt", dependencies=[Depends(autorizar)])
