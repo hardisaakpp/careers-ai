@@ -11,7 +11,7 @@ import os
 import tempfile
 import threading
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
@@ -29,6 +29,8 @@ from .modelos import Oferta
 from .ranking.embeddings import ConCache, Embedder, ollama
 from .ranking.preferencias import Preferencias
 from .ranking.ranking import ordenar, texto_oferta
+from .traducir import Llm as LlmTraducir
+from .traducir import TraduccionError, ollama_traducir, traducir
 
 MAX_OFERTAS = 500
 
@@ -49,15 +51,22 @@ class OfertaCv(BaseModel):
 class RenderIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     cv: Cv
+    idioma: Literal["es", "en"] = "es"  # rótulos de las secciones y «actual»/«Present»
+
+
+class TraducirIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    cv: Cv
 
 
 class Ajustes:
     def __init__(self, clave: str, cache: Path, embedder: Embedder = ollama, llm: Llm = ollama_json,
-                 compilador: Callable[[Path], Path] = compilar, llm_importar: Llm = ollama_importar) -> None:
+                 compilador: Callable[[Path], Path] = compilar, llm_importar: Llm = ollama_importar,
+                 llm_traducir: LlmTraducir = ollama_traducir) -> None:
         if len(clave) < 16:
             raise ValueError("CAREERS_AI_KEY debe tener al menos 16 caracteres")
         self.clave, self.cache, self.embedder, self.llm, self.compilador = clave, cache, embedder, llm, compilador
-        self.llm_importar = llm_importar
+        self.llm_importar, self.llm_traducir = llm_importar, llm_traducir
         cache.parent.mkdir(parents=True, exist_ok=True)
 
 
@@ -122,12 +131,21 @@ def crear_app(ajustes: Ajustes | None = None) -> FastAPI:
     async def render(cuerpo: RenderIn):
         with tempfile.TemporaryDirectory() as tmp:
             tex = Path(tmp) / "cv.tex"
-            tex.write_text(renderizar(cuerpo.cv), "utf-8")
+            tex.write_text(renderizar(cuerpo.cv, idioma=cuerpo.idioma), "utf-8")
             try:
                 pdf = await run_in_threadpool(a.compilador, tex)
             except Exception as e:  # noqa: BLE001 - latexmk/docker
                 raise HTTPException(422, "no se pudo compilar el CV") from e
             return Response(pdf.read_bytes(), media_type="application/pdf")
+
+    @app.post("/v1/translate", dependencies=[Depends(autorizar)])
+    async def traducir_cv(cuerpo: TraducirIn):
+        """Borrador en inglés del CV (español). Nada se guarda: la persona lo revisa y lo edita."""
+        try:
+            en, avisos = await run_in_threadpool(traducir, cuerpo.cv, a.llm_traducir)
+        except TraduccionError as e:
+            raise HTTPException(502, "ia-fallo") from e
+        return {"cv": en.model_dump(mode="json"), "avisos": avisos}
 
     @app.post("/v1/import", dependencies=[Depends(autorizar)])
     async def importar_cv(request: Request):

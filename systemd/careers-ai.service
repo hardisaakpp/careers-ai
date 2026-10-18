@@ -1,0 +1,15 @@
+# careers-ai as a user service: starts at boot (the account has lingering enabled) and restarts if it dies.
+# Install:  cp systemd/careers-ai.service ~/.config/systemd/user/ && systemctl --user daemon-reload \
+#           && systemctl --user enable --now careers-ai
+# It needs Docker (the CV is compiled there) and Ollama (translation, import, ranking), both system services.
+[Unit]
+Description=careers-ai (CV rendering, translation, import and ranking)
+
+[Service]
+WorkingDirectory=%h/Documents/careers-ai
+ExecStart=%h/Documents/careers-ai/dev.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

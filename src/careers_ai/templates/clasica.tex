@@ -12,6 +12,9 @@
 \usepackage{fontawesome5}
 \usepackage{titlesec}
 \pagestyle{empty}
+% Sin cortar palabras con guion al final de línea: la palabra pasa entera a la línea siguiente.
+\hyphenpenalty=10000 \exhyphenpenalty=10000
+\tolerance=2000 \emergencystretch=3em
 \setlength{\parindent}{0pt}
 % Espacio entre una empresa/estudio/proyecto y el siguiente: lo bastante para que se distingan a simple vista.
 \newlength{\entradagap}\setlength{\entradagap}{9pt}
@@ -19,11 +22,14 @@
 \titlespacing*{\section}{0pt}{10pt}{5pt}
 \setlist[itemize]{leftmargin=1.2em,itemsep=1pt,topsep=2pt}
 
-<% macro fechas(desde, hasta) %><% if desde %><< desde|tex >> -- << (hasta or "actual")|tex >><% elif hasta %><< hasta|tex >><% endif %><% endmacro %>
+<% macro fechas(desde, hasta) %><% if desde %><< desde|tex >> -- << (hasta or L.actual)|tex >><% elif hasta %><< hasta|tex >><% endif %><% endmacro %>
 <% macro trabajos(lista) %>
 <% for e in lista %>
-\textbf{<< e.organizacion|tex >>}<% if e.ubicacion %> \hfill \textit{<< e.ubicacion|tex >>}<% endif %>\\
+<% if e.proyecto %>\textbf{<< e.proyecto|tex >>}<% if e.organizacion %> (<< e.organizacion|tex >>)<% endif %>\\
+<< e.cargo|tex >><% if e.ubicacion or e.desde or e.hasta %> \hfill \textit{<< [(e.ubicacion|tex) if e.ubicacion else "", fechas(e.desde, e.hasta)|trim]|select|join(" · ") >>}<% endif %>
+<% else %>\textbf{<< e.organizacion|tex >>}<% if e.ubicacion %> \hfill \textit{<< e.ubicacion|tex >>}<% endif %>\\
 << e.cargo|tex >><% if e.desde or e.hasta %> \hfill \textit{<< fechas(e.desde, e.hasta) >>}<% endif %>
+<% endif %>
 <% if e.logros %>
 \begin{itemize}
 <% for l in e.logros %>
@@ -45,12 +51,12 @@
 \end{center}
 <% if cv.resumen %>
 
-\section*{Perfil profesional}
+\section*{<< L.perfil >>}
 << cv.resumen|tex >>
 <% endif %>
 <% if cv.educacion %>
 
-\section*{Educación}
+\section*{<< L.educacion >>}
 <% for d in cv.educacion %>
 \textbf{<< d.titulo|tex >>}<% if d.desde or d.hasta %> \hfill \textit{<< fechas(d.desde, d.hasta) >>}<% endif %>\\
 << d.institucion|tex >><% if d.ubicacion %> \hfill \textit{<< d.ubicacion|tex >>}<% endif %><% if not loop.last %>\par\vspace{\entradagap}<% endif %>
@@ -58,25 +64,25 @@
 <% endif %>
 <% if cv.experiencia %>
 
-\section*{Experiencia laboral}
+\section*{<< L.experiencia >>}
 << trabajos(cv.experiencia) >>
 <% endif %>
 <% if cv.investigacion %>
 
-\section*{Investigación}
+\section*{<< L.investigacion >>}
 << trabajos(cv.investigacion) >>
 <% endif %>
 <% if cv.proyectos %>
 
-\section*{Proyectos}
+\section*{<< L.proyectos >>}
 <% for p in cv.proyectos %>
-\textbf{<< p.nombre|tex >>}<% if p.url %> (\href{<< p.url|tex >>}{enlace})<% endif %>: << p.descripcion|tex >>
+\textbf{<< p.nombre|tex >>}<% if p.url %> (\href{<< p.url|tex >>}{<< L.enlace >>})<% endif %>: << p.descripcion|tex >>
 <% if p.tecnologias %> \textit{<< p.tecnologias|join(", ")|tex >>}<% endif %><% if not loop.last %>\par\vspace{\entradagap}<% endif %>
 <% endfor %>
 <% endif %>
 <% if cv.habilidades %>
 
-\section*{Habilidades}
+\section*{<< L.habilidades >>}
 <% for g in cv.habilidades %>
 \textbf{<< g.nombre|tex >>:} << g.items|join(", ")|tex >>
 
@@ -84,21 +90,21 @@
 <% endif %>
 <% if cv.certificaciones %>
 
-\section*{Certificaciones}
+\section*{<< L.certificaciones >>}
 <% for c in cv.certificaciones %>
 <% if c.anio %><< c.anio|tex >>\quad <% endif %>\textbf{<< c.nombre|tex >>}<% if c.emisor %> \hfill \textit{<< c.emisor|tex >>}<% endif %><% if not loop.last %>\\<% endif %>
 <% endfor %>
 <% endif %>
 <% if cv.idiomas %>
 
-\section*{Idiomas}
+\section*{<< L.idiomas >>}
 <% for i in cv.idiomas %>
 \textbf{<< i.nombre|tex >>}<% if i.nivel %>: << i.nivel|tex >><% endif %><% if not loop.last %>\\<% endif %>
 <% endfor %>
 <% endif %>
 <% if cv.referencias %>
 
-\section*{Referencias}
+\section*{<< L.referencias >>}
 <% for r in cv.referencias %>
 \textbf{<< r.nombre|tex >>}<% if r.cargo %>, << r.cargo|tex >><% endif %><% if r.contacto %> \hfill << r.contacto|tex >><% endif %><% if not loop.last %>\\<% endif %>
 <% endfor %>

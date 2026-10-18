@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from jinja2 import Environment, StrictUndefined
 
+from .enfasis import a_latex
 from .modelo import Cv
 
 _ESCAPES = {
@@ -104,12 +105,29 @@ def _entorno() -> Environment:
         undefined=StrictUndefined,
         autoescape=False,
     )
-    env.filters["tex"] = escapar
+    env.filters["tex"] = lambda texto: a_latex(escapar(texto))  # **texto** → negrita, ya escapado
     return env
 
 
-def renderizar(cv: Cv, plantilla: str = "clasica.tex") -> str:
+IDIOMAS = ("es", "en")
+
+# Rótulos fijos de la plantilla por idioma; el contenido de la persona no pasa por aquí.
+ROTULOS = {
+    "es": {"perfil": "Perfil profesional", "educacion": "Educación", "experiencia": "Experiencia laboral",
+           "investigacion": "Investigación", "proyectos": "Proyectos", "habilidades": "Habilidades",
+           "certificaciones": "Certificaciones", "idiomas": "Idiomas", "referencias": "Referencias",
+           "actual": "actual", "enlace": "enlace"},
+    "en": {"perfil": "Professional Summary", "educacion": "Education", "experiencia": "Work Experience",
+           "investigacion": "Research", "proyectos": "Projects", "habilidades": "Skills",
+           "certificaciones": "Certifications", "idiomas": "Languages", "referencias": "References",
+           "actual": "Present", "enlace": "link"},
+}
+
+
+def renderizar(cv: Cv, plantilla: str = "clasica.tex", idioma: str = "es") -> str:
+    if idioma not in ROTULOS:
+        raise ValueError(f"idioma no soportado: {idioma}")
     fuente = resources.files("careers_ai").joinpath("templates", plantilla).read_text("utf-8")
     visible = cv.para_pdf()
     linea = linea_contacto(visible, iconos=ICONOS_OCULTOS not in cv.ocultas)
-    return _entorno().from_string(fuente).render(cv=visible, contacto_linea=linea)
+    return _entorno().from_string(fuente).render(cv=visible, contacto_linea=linea, L=ROTULOS[idioma])

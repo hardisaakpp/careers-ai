@@ -25,6 +25,7 @@ class Experiencia(_Base):
     logros: list[str] = Field(default_factory=list)
     tecnologias: list[str] = Field(default_factory=list)
     incluir: bool = True  # False = se guarda pero no sale en el PDF
+    proyecto: str | None = None  # nombre del proyecto o laboratorio (investigación): encabeza la entrada
 
 
 class Educacion(_Base):

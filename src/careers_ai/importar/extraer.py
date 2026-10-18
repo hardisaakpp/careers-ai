@@ -50,6 +50,7 @@ class BTrabajo(_B):
     hasta: str = ""  # vacío = trabajo actual
     logros: list[str] = []
     tecnologias: list[str] = []
+    proyecto: str = ""  # nombre del proyecto o laboratorio (solo investigación)
 
 
 class BEstudio(_B):
@@ -137,7 +138,8 @@ def construir_prompt(texto: str) -> str:
         "- El nombre completo puede estar partido en varias líneas (ej. nombre en una y apellido en otra): únelo.\n"
         "- Clasifica por el CONTENIDO, no por el título de la sección (a veces el título no corresponde).\n"
         "- `experiencia`: trabajos y pasantías. `investigacion`: solo cargos de investigación (laboratorio, "
-        "artículos); si dudas, `experiencia`.\n"
+        "artículos); si dudas, `experiencia`. En `investigacion`, `proyecto` es el nombre del proyecto o laboratorio \n"
+        "(ej. «Smart Lab: …») y `organizacion` la institución; si no hay proyecto con nombre, déjalo vacío.\n"
         "- Fechas: cópialas literales (ej. «Septiembre 2025»). Si el trabajo sigue vigente "
         "(«actualidad», «presente»), `hasta` queda vacío.\n"
         "- `logros`: una viñeta o frase por elemento, tal cual. `tecnologias`: solo las que se nombran en "
@@ -199,7 +201,8 @@ def _trabajos(items: list[BTrabajo], f: Fuente) -> list[Experiencia]:
         desde, hasta = _fechas(f.texto(t.desde), f.texto(t.hasta))
         salida.append(Experiencia(
             cargo=cargo, organizacion=org, desde=desde, hasta=hasta, ubicacion=f.texto(t.ubicacion) or None,
-            logros=f.lista(t.logros), tecnologias=_tecnologias(f.lista(t.tecnologias))))
+            logros=f.lista(t.logros), tecnologias=_tecnologias(f.lista(t.tecnologias)),
+            proyecto=f.texto(t.proyecto) or None))
     return salida
 
 

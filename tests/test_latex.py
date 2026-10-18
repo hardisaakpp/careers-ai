@@ -195,3 +195,43 @@ def test_estudios_y_proyectos_se_separan_igual_que_las_experiencias():
     proyectos = [{"nombre": f"P{i}", "descripcion": "d"} for i in range(3)]
     tex = renderizar(_cv(experiencia=[], investigacion=[], educacion=estudios, proyectos=proyectos))
     assert tex.count(sep) == 4  # 2 entre estudios + 2 entre proyectos
+
+
+def test_la_investigacion_con_proyecto_lo_pone_en_negrita_con_la_organizacion_entre_parentesis():
+    tex = _pdf(investigacion=[{"cargo": "Investigador", "organizacion": "Escuela Politécnica Nacional", "desde": "2025-10",
+                               "proyecto": "Smart Lab: ciberseguridad e IoT", "logros": ["Orquestador de IA"]}])
+    assert r"\textbf{Smart Lab: ciberseguridad e IoT} (Escuela Politécnica Nacional)" in tex
+    assert r"\textbf{Escuela Politécnica Nacional}" not in tex
+
+
+def test_sin_proyecto_la_organizacion_sigue_encabezando_la_entrada():
+    tex = _pdf(investigacion=[{"cargo": "Investigador", "organizacion": "Smart Lab", "desde": "2025-10"}])
+    assert r"\textbf{Smart Lab}" in tex and "(Smart Lab)" not in tex
+
+
+def test_el_idioma_cambia_los_rotulos_y_actual():
+    es, en = renderizar(_cv()), renderizar(_cv(), idioma="en")
+    assert r"\section*{Experiencia laboral}" in es and r"\section*{Work Experience}" in en
+    assert "2022-03 -- actual" in es and "2022-03 -- Present" in en
+    assert "Perfil profesional" not in en
+
+
+def test_idioma_desconocido_se_rechaza():
+    with pytest.raises(ValueError):
+        renderizar(_cv(), idioma="fr")
+
+
+def test_lo_marcado_sale_en_negrita_y_lo_demas_no():
+    cv = _cv(resumen="Experto en **FastAPI y Celery** con 5 años")
+    tex = renderizar(cv)
+    assert r"Experto en \textbf{FastAPI y Celery} con 5 años" in tex
+
+
+def test_el_enfasis_se_escapa_antes_de_convertirse():
+    tex = renderizar(_cv(resumen=r"**A & B** y **\input{x}**"))
+    assert r"\textbf{A \& B}" in tex and r"\input{x}" not in tex.replace(r"\textbackslash{}", "")
+
+
+def test_una_marca_sin_pareja_no_llega_al_pdf():
+    tex = renderizar(_cv(resumen="Uno ** suelto y **otro sin cerrar"))
+    assert "**" not in tex
